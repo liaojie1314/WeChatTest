@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>movie</title>
+</head>
+<body>
+<div id="app">
+    <header>
+        <a class="header_title" href="/movie">电影</a>
+        <a class="header_search" href="/search">搜索</a>
+    </header>
+    <div class="page">
+        <h1 class="title"><%= data.title %></h1>
+        <section class="info">
+            <div class="left">
+                <p class="rating">
+                    <span>评分：</span>
+                    <strong><%= data.rating %></strong>
+                    <span class="ratingNum">98375人评价</span>
+                </p>
+                <p class="meta">
+                    <%= data.runtime %> /
+                    <%= data.genre.forEach()(function(item){ %>
+                        <%= item %> /
+                    <% }) %>
+                    <%= data.directors %>(导演) / <%= data.casts %> / <%= data.releaseDate %>
+                </p>
+            </div>
+            <div class="right">
+                <a href="javascript:">
+                    <img src="<%= data.image %>" alt="<%= data.title %>">
+                </a>
+            </div>
+        </section>
+        <section class="intro">
+            <h2><%= data.title %>的简介</h2>
+            <div class="bd">
+                <p><%= data.summary %></p>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>

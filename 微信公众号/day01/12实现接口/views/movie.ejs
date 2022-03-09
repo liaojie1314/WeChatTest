@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1">
+    <title>电影预告片</title>
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-p1KAotb3W9ndluCsqePPYnjRm3c6abdnIjo0tQwYUv83VsbsYd43RuofnFAaDo0E" crossorigin="anonymous">
+    <link href="https://cdn.bootcdn.net/ajax/libs/dplayer/1.9.1/DPlayer.min.css" rel="stylesheet">
+    <style>
+        .container {
+            padding: 0;
+        }
+
+        .navbar-brand {
+            color: white !important;
+        }
+
+        .btn.my-2.my-sm-0 {
+            color: white;
+            border-color: #ffffff;
+        }
+
+        .card-title {
+            font-weight: bold;
+        }
+
+        .btn.btn-link {
+            text-decoration: none;
+            color: #212529;
+            padding: 0;
+            margin-left: -0.1em;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand">电影预告片</a>
+        <form class="form-inline" action="/search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+
+    <div class="row">
+        <div class="col">
+
+            <div class="card-group">
+                <%= data.forEach(function (item, index) { %>
+                <div class="card">
+                    <img src="http://r6v3vcdm2.hn-bkt.clouddn.com/<%= item.posterKey %>" class="card-img-top"
+                         alt="Card image cap"
+                         data-coverkey="http://r6v3vcdm2.hn-bkt.clouddn.com/<%= item.coverKey %>"
+                         data-videokey="http://r6v3vcdm2.hn-bkt.clouddn.com/<%= item.videoKey %>">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= item.title %></h5>
+                        <p class="card-text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= item.summary %></p>
+                    </div>
+                    <div class="card-header" id="heading<%= index %>">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left collapsed" type="button"
+                                    data-toggle="collapse" data-target="#collapse<%= index %>" aria-expanded="false"
+                                    aria-controls="collapse<%= index %>">
+                                电影详情
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapse<%= index %>" class="collapse" aria-labelledby="heading<%= index %>"
+                         data-parent="#accordionExample">
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">导演：<%= item.directors.forEach(function (item) { %>
+                                    <%= item %>&nbsp;&nbsp;
+                                    <% }) %>
+                                </li>
+                                <li class="list-group-item">主演：<%= item.casts.forEach(function (item) { %>
+                                    <%= item %>&nbsp;&nbsp;
+                                    <% }) %>
+                                </li>
+                                <li class="list-group-item">评分: 暂无评分</li>
+                                <li class="list-group-item">类型：<%= item.genre.forEach(function (item) { %>
+                                    <%= item %>&nbsp;&nbsp;
+                                    <% }) %>
+                                </li>
+                                <li class="list-group-item">上映时间：<%= item.releaseDate %></li>
+                                <li class="list-group-item">片长：<%= item.runtime %></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted"><%= Math.ceil((Date.now() - item.createTime) / 86400000) %>
+                            天前更新</small>
+                    </div>
+                </div>
+                <% }) %>
+                >
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div id="dplayer"></div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-E5Sj1saJVFNzWWK3YIJB4LEDEEVEGaOdfmCprPDkfWUo+xkb6Ep52Q1TMEtgcFwi"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/dplayer/1.9.1/DPlayer.min.js"></script>
+<script type="text/javascript">
+    let dp = null;
+    //记录上一次视频
+    let lastVideo = null;
+    //模态框消失时的事件
+    $(function () {
+        $('#myModal').on('hidden.bs.modal', function (event) {
+            //暂停视频播放器
+            dp.pause();
+        })
+        //每个image图片绑定点击事件
+        $('.card-img-top').click(function () {
+
+            $('#myModal').modal('show');
+            //获取视频和封面连接
+            const video = $(this).data('videokey');
+            const cover = $(this).data('coverkey');
+            if (!dp) {//创建播放器对象
+                dp = new DPlayer({
+                    container: document.getElementById('dplayer'),
+                    video: {
+                        url: video,
+                        pic: cover,
+                        thumbnails: cover,
+                    },
+                    danmaku: {
+                        id: 'demo',
+                        api: 'https://api.prprpr.me/dplayer/',
+                    }
+                });
+            } else {//切换到其他视频
+                //判断是否点击了同一个视频
+                if (video == lastVideo)
+                {
+                    //同一个视频
+                    dp.play();
+                }else {
+                    dp.switchVideo(
+                        {
+                            url: video,
+                            pic: cover,
+                            thumbnails: cover,
+                        },
+                        {
+                            id: 'test',
+                            api: 'https://api.prprpr.me/dplayer/',
+                            maximum: 3000,
+                            user: 'DIYgod',
+                        }
+                    );
+                }
+            }
+            //同步
+            lastVideo=video;
+        })
+    })
+</script>
+</body>
+</html>
